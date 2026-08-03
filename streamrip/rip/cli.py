@@ -12,14 +12,12 @@ import aiohttp
 import click
 from click_help_colors import HelpColorsGroup  # type: ignore
 from rich.logging import RichHandler
-from rich.markdown import Markdown
 from rich.prompt import Confirm
 from rich.traceback import install
 
 from .. import __version__, db
 from ..config import DEFAULT_CONFIG_PATH, Config, OutdatedConfigError, set_user_defaults
 from ..console import console
-from ..utils.ssl_utils import get_aiohttp_connector_kwargs
 from .main import Main
 
 
@@ -176,32 +174,10 @@ async def url(ctx, urls):
     try:
         with ctx.obj["config"] as cfg:
             cfg: Config
-            updates = cfg.session.misc.check_for_updates
-            if updates:
-                # Run in background
-                version_coro = asyncio.create_task(
-                    latest_streamrip_version(
-                        verify_ssl=cfg.session.downloads.verify_ssl
-                    )
-                )
-            else:
-                version_coro = None
-
             async with Main(cfg) as main:
                 await main.add_all(urls)
                 await main.resolve()
                 await main.rip()
-
-            if version_coro is not None:
-                latest_version, notes = await version_coro
-                if latest_version != __version__:
-                    console.print(
-                        f"\n[green]A new version of streamrip [cyan]v{latest_version}[/cyan]"
-                        " is available! Run [white][bold]pip3 install streamrip --upgrade[/bold][/white]"
-                        " to update.[/green]\n"
-                    )
-
-                    console.print(Markdown(notes))
 
     except aiohttp.ClientConnectorCertificateError as e:
         from ..utils.ssl_utils import print_ssl_error_help
@@ -446,35 +422,6 @@ async def id(ctx, source, media_type, id):
             await main.add_by_id(source, media_type, id)
             await main.resolve()
             await main.rip()
-
-
-async def latest_streamrip_version(verify_ssl: bool = True) -> tuple[str, str | None]:
-    """Get the latest streamrip version from PyPI and release notes from GitHub.
-
-    Args:
-        verify_ssl: Whether to verify SSL certificates
-
-    Returns:
-        A tuple of (version, release_notes)
-    """
-    # Create connector with appropriate SSL settings
-    connector_kwargs = get_aiohttp_connector_kwargs(verify_ssl=verify_ssl)
-    connector = aiohttp.TCPConnector(**connector_kwargs)
-
-    async with aiohttp.ClientSession(connector=connector) as s:
-        async with s.get("https://pypi.org/pypi/streamrip/json") as resp:
-            data = await resp.json()
-        version = data["info"]["version"]
-
-        if version == __version__:
-            return version, None
-
-        async with s.get(
-            "https://api.github.com/repos/nathom/streamrip/releases/latest"
-        ) as resp:
-            json = await resp.json()
-        notes = json["body"]
-    return version, notes
 
 
 if __name__ == "__main__":
