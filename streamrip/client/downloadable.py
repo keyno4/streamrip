@@ -2,6 +2,7 @@ import asyncio
 import base64
 import functools
 import hashlib
+import http.client
 import itertools
 import json
 import logging
@@ -25,6 +26,12 @@ from .. import converter
 from ..exceptions import NonStreamableError
 
 logger = logging.getLogger("streamrip")
+
+# Some CDNs/edge servers return malformed responses with duplicated headers
+# (e.g. repeated Set-Cookie) that exceed http.client's default 100-header
+# limit, aborting the download mid-transfer. Raise it so requests.get() in
+# fast_async_download can still read the response.
+http.client._MAXHEADERS = 1000
 
 
 BLOWFISH_SECRET = "g4el58wc0zvf9na1"
