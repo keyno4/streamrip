@@ -3,6 +3,14 @@
 [![Downloads](https://pepy.tech/badge/streamrip)](https://pepy.tech/project/streamrip)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
+## About this fork
+
+This fork (`keyno4/streamrip`) builds on [`mikelandzelo173/streamrip`](https://github.com/mikelandzelo173/streamrip) and adds:
+
+- **Working Qobuz login** — thanks to [mikelandzelo173](https://github.com/mikelandzelo173) for the fix to the new Qobuz auth flow.
+- **Fixed the PyPI update-check nag** — it used to compare this fork's version against upstream PyPI and tell you to `pip install --upgrade`, which would silently revert the Qobuz login fix above.
+- **Fixed a header-limit crash on download** — some CDN responses return more headers than Python's `http.client` allows by default, aborting downloads mid-transfer.
+
 A scriptable stream downloader for Qobuz, Tidal, Deezer and SoundCloud.
 
 ![downloading an album](https://github.com/nathom/streamrip/blob/dev/demo/download_album.png?raw=true)
