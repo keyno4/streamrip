@@ -5,7 +5,7 @@
 
 ## About this fork
 
-This fork (`keyno4/streamrip`) builds on [`mikelandzelo173/streamrip`](https://github.com/mikelandzelo173/streamrip) and adds:
+This fork (`keyno4/streamrip`) builds on [`mikelandzelo173/streamrip`](https://github.com/mikelandzelo173/streamrip) and adds from nathom's original:
 
 - **Working Qobuz login** — thanks to [mikelandzelo173](https://github.com/mikelandzelo173) for the fix to the new Qobuz auth flow.
 - **Fixed the PyPI update-check nag** — it used to compare this fork's version against upstream PyPI and tell you to `pip install --upgrade`, which would silently revert the Qobuz login fix above.
